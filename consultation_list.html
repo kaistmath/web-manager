@@ -259,8 +259,11 @@
 
                 // 리포트 버튼
                 let reportAction = '';
-                if (item.reportUrl && item.reportUrl.startsWith('http')) {
-                    reportAction = `<a href="${item.reportUrl}" target="_blank" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs mr-2">보고서</a>`;
+                // [수정] reportUrl이 문자열인지 확인하고 안전하게 처리
+                const reportUrl = String(item.reportUrl || '');
+
+                if (reportUrl && reportUrl.startsWith('http')) {
+                    reportAction = `<a href="${reportUrl}" target="_blank" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs mr-2">보고서</a>`;
                 } else {
                     reportAction = `<span class="text-gray-400 text-xs mr-2">리포트 없음</span>`;
                 }
