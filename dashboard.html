@@ -19,75 +19,119 @@
 
 <body class="bg-gray-50 text-gray-800">
 
-    <!-- Sidebar (Mobile hidden) -->
     <div class="flex h-screen overflow-hidden">
-        <button class="text-white focus:outline-none">
-            <i class="fas fa-bars text-2xl"></i>
-        </button>
-        </header>
-
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-            <div class="max-w-6xl mx-auto">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">대시보드</h2>
-
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <!-- Card 1 -->
-                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-gray-500 text-sm font-medium">총 원생 수</h3>
-                            <div
-                                class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                <i class="fas fa-users text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-end">
-                            <span class="text-3xl font-bold text-gray-800" id="stat-total-students">-</span>
-                            <span class="ml-2 text-sm text-gray-500 mb-1">명</span>
-                        </div>
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-gray-500 text-sm font-medium">오늘 출석률</h3>
-                            <div
-                                class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                                <i class="fas fa-calendar-check text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-end">
-                            <span class="text-3xl font-bold text-gray-800" id="stat-today-attendance">-</span>
-                            <span class="ml-2 text-sm text-gray-500 mb-1">%</span>
+        <!-- Sidebar -->
+        <aside class="w-64 bg-indigo-900 text-white hidden md:flex flex-col shadow-xl">
+            <div class="p-6 border-b border-indigo-800">
+                <h1 class="text-2xl font-bold tracking-wider">ACADEMY<br><span
+                        class="text-indigo-300 text-sm font-normal">Manager System</span></h1>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <ul class="space-y-1">
+                    <li>
+                        <a href="dashboard.html"
+                            class="flex items-center px-6 py-3 bg-indigo-800 text-white border-l-4 border-indigo-400">
+                            <i class="fas fa-chart-pie w-6 text-center mr-2"></i>
+                            <span class="font-medium">대시보드</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="student_management.html"
+                            class="flex items-center px-6 py-3 text-gray-300 hover:bg-indigo-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-indigo-400">
+                            <i class="fas fa-user-graduate w-6 text-center mr-2"></i>
+                            <span class="font-medium">학생 관리</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-indigo-800">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold"
+                            id="user-avatar">U</div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium" id="user-name">User</p>
+                            <p class="text-xs text-indigo-400" id="user-role">Role</p>
                         </div>
                     </div>
-
-                    <!-- Card 3 -->
-                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-gray-500 text-sm font-medium">총 선생님 수</h3>
-                            <div
-                                class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                                <i class="fas fa-chalkboard-teacher text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-end">
-                            <span class="text-3xl font-bold text-gray-800" id="stat-total-teachers">-</span>
-                            <span class="ml-2 text-sm text-gray-500 mb-1">명</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts Area -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">학년별 분포 (예시)</h3>
-                        <canvas id="gradeChart" height="200"></canvas>
-                    </div>
+                    <button onclick="logout()" class="text-gray-400 hover:text-white"><i
+                            class="fas fa-sign-out-alt"></i></button>
                 </div>
             </div>
-        </main>
-    </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Mobile Header -->
+            <header class="md:hidden bg-indigo-900 text-white p-4 flex justify-between items-center shadow-md z-10">
+                <h1 class="text-xl font-bold">Academy Manager</h1>
+                <button class="text-white focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                <div class="max-w-6xl mx-auto">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">대시보드</h2>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <!-- Card 1 -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-gray-500 text-sm font-medium">총 원생 수</h3>
+                                <div
+                                    class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                    <i class="fas fa-users text-lg"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end">
+                                <span class="text-3xl font-bold text-gray-800" id="stat-total-students">-</span>
+                                <span class="ml-2 text-sm text-gray-500 mb-1">명</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-gray-500 text-sm font-medium">오늘 출석률</h3>
+                                <div
+                                    class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                    <i class="fas fa-calendar-check text-lg"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end">
+                                <span class="text-3xl font-bold text-gray-800" id="stat-today-attendance">-</span>
+                                <span class="ml-2 text-sm text-gray-500 mb-1">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-gray-500 text-sm font-medium">총 선생님 수</h3>
+                                <div
+                                    class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                    <i class="fas fa-chalkboard-teacher text-lg"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end">
+                                <span class="text-3xl font-bold text-gray-800" id="stat-total-teachers">-</span>
+                                <span class="ml-2 text-sm text-gray-500 mb-1">명</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Area -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">학년별 분포 (예시)</h3>
+                            <canvas id="gradeChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 
     <script>
