@@ -75,7 +75,7 @@
 
     <script>
         // ==========================================
-        // [설정] Apps Script 배포 URL을 여기에 입력하세요
+        // [설정] Apps Script 배포 URL
         // ==========================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwGkrnysBSx7BLZkerKU-Wj1rRxkoIY8mfLANjuLR_3nDrMBiAlJj7OZ8Y6Bv94Fiyj/exec";
         // ==========================================
@@ -114,18 +114,19 @@
 
             try {
                 // GAS API 호출 (Action: login)
-                // 중요: Content-Type을 text/plain으로 설정하여 CORS Preflight(OPTIONS) 요청을 최소화함
+                // 중요: application/x-www-form-urlencoded 방식을 사용하여 CORS Preflight를 방지함
+                const formData = new URLSearchParams();
+                formData.append('action', 'login');
+                formData.append('id', id);
+                formData.append('pw', pw);
+                formData.append('role', role);
+
                 const response = await fetch(GAS_API_URL, {
                     method: 'POST',
                     headers: {
-                        "Content-Type": "text/plain;charset=utf-8",
+                        "Content-Type": "application/x-www-form-urlencoded",
                     },
-                    body: JSON.stringify({
-                        action: 'login',
-                        id: id,
-                        pw: pw,
-                        role: role
-                    })
+                    body: formData.toString()
                 });
 
                 console.log("Response status:", response.status);
@@ -156,7 +157,7 @@
 
             } catch (error) {
                 console.error("Login Error Details:", error);
-                alert("서버 통신 오류: " + error.message + "\n(F12 개발자 도구의 콘솔(Console) 탭을 확인해주세요)");
+                alert("서버 통신 오류: " + error.message + "\\n(F12 개발자 도구의 콘솔(Console) 탭을 확인해주세요)");
             } finally {
                 btn.disabled = false;
                 btn.innerText = originalText;
