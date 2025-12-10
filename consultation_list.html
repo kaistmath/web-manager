@@ -209,9 +209,20 @@
                     body: formData.toString()
                 });
 
+                // 응답을 텍스트로 먼저 받아서 확인 (디버깅용)
+                const text = await response.text();
+                console.log("Raw Response:", text);
+
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    // JSON 파싱 실패 시 원본 텍스트의 일부를 에러 메시지로 표시
+                    throw new Error(`서버 응답이 JSON 형식이 아닙니다. (응답: ${text.substring(0, 100)}...)`);
+                }
+
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-                const result = await response.json();
                 console.log("Consultation list:", result);
 
                 if (result.success) {
@@ -223,7 +234,12 @@
 
             } catch (error) {
                 console.error("Load Error:", error);
-                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-10 text-center text-red-500">서버 통신 오류</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-10 text-center text-red-500">
+                    <div class="flex flex-col items-center">
+                        <span class="font-bold">서버 통신 오류</span>
+                        <span class="text-xs text-gray-500 mt-2 max-w-md break-all">${error.message}</span>
+                    </div>
+                </td></tr>`;
             }
         }
 
