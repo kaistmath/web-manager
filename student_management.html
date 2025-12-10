@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학원관리 시스템 - 학생 관리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        /* 커스텀 스크롤바 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c7c7c7;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-indigo-900 text-white hidden md:flex flex-col shadow-xl">
+            <div class="p-6 border-b border-indigo-800">
+                <h1 class="text-2xl font-bold tracking-wider">ACADEMY<br><span
+                        class="text-indigo-300 text-sm font-normal">Manager System</span></h1>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <ul class="space-y-1">
+                    <li>
+                        <a href="dashboard.html"
+                            class="flex items-center px-6 py-3 text-gray-300 hover:bg-indigo-800 hover:text-white transition-colors border-l-4 border-transparent hover:border-indigo-400">
+                            <i class="fas fa-chart-pie w-6 text-center mr-2"></i>
+                            <span class="font-medium">대시보드</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="student_management.html"
+                            class="flex items-center px-6 py-3 bg-indigo-800 text-white border-l-4 border-indigo-400">
+                            <i class="fas fa-user-graduate w-6 text-center mr-2"></i>
+                            <span class="font-medium">학생 관리</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-indigo-800">
+                <button onclick="logout()" class="flex items-center text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-sign-out-alt mr-2"></i> 로그아웃
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm z-10 p-4 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-users mr-2 text-indigo-600"></i>학생 관리</h2>
+                <button onclick="openModal('register')"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center">
+                    <i class="fas fa-plus mr-2"></i> 신규 학생 등록
+                </button>
+            </header>
+
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+
+                <!-- Filters & Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <!-- 각 컬럼 헤더 및 필터 -->
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        이름
+                                        <input type="text" id="filter-name" onkeyup="filterTable()"
+                                            class="mt-1 block w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="검색">
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        학교
+                                        <input type="text" id="filter-school" onkeyup="filterTable()"
+                                            class="mt-1 block w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="검색">
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        학년
+                                        <select id="filter-grade" onchange="filterTable()"
+                                            class="mt-1 block w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="">전체</option>
+                                            <option value="초등">초등</option>
+                                            <option value="중등">중등</option>
+                                            <option value="고등">고등</option>
+                                        </select>
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        연락처
+                                        <input type="text" id="filter-phone" onkeyup="filterTable()"
+                                            class="mt-1 block w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="뒷자리">
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        상태
+                                        <select id="filter-status" onchange="filterTable()"
+                                            class="mt-1 block w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="재원">재원</option>
+                                            <option value="휴원">휴원</option>
+                                            <option value="퇴원">퇴원</option>
+                                            <option value="">전체</option>
+                                        </select>
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        관리
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="student-table-body">
+                                <!-- 데이터 로딩 중 표시 -->
+                                <tr>
+                                    <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i> 데이터를 불러오는 중입니다...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Student Modal (Register/Edit) -->
+    <div id="studentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900" id="modalTitle">학생 등록</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="studentForm" onsubmit="handleStudentSubmit(event)">
+                <input type="hidden" id="studentId"> <!-- 수정 시 사용 -->
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">이름</label>
+                            <input type="text" id="name" required
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">학교</label>
+                            <input type="text" id="school"
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">학년</label>
+                            <select id="grade"
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                                <option value="초1">초1</option>
+                                <option value="초2">초2</option>
+                                <option value="초3">초3</option>
+                                <option value="초4">초4</option>
+                                <option value="초5">초5</option>
+                                <option value="초6">초6</option>
+                                <option value="중1">중1</option>
+                                <option value="중2">중2</option>
+                                <option value="중3">중3</option>
+                                <option value="고1">고1</option>
+                                <option value="고2">고2</option>
+                                <option value="고3">고3</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">상태</label>
+                            <select id="status"
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                                <option value="재원">재원</option>
+                                <option value="휴원">휴원</option>
+                                <option value="퇴원">퇴원</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">학생 연락처</label>
+                        <input type="text" id="phone" placeholder="010-0000-0000"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">학부모 연락처</label>
+                        <input type="text" id="parentPhone" placeholder="010-0000-0000"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">등록일</label>
+                        <input type="date" id="regDate" required
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal()"
+                        class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">취소</button>
+                    <button type="submit"
+                        class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwGkrnysBSx7BLZkerKU-Wj1rRxkoIY8mfLANjuLR_3nDrMBiAlJj7OZ8Y6Bv94Fiyj/exec";
+        let allStudents = []; // 전체 학생 데이터 저장용
+
+        // 초기화
+        window.onload = function () {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('regDate').value = today;
+            loadStudents();
+        };
+
+        function logout() {
+            if (confirm("로그아웃 하시겠습니까?")) {
+                localStorage.removeItem('academy_user');
+                sessionStorage.removeItem('academy_user');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 학생 목록 불러오기
+        async function loadStudents() {
+            try {
+                const formData = new URLSearchParams();
+                formData.append('action', 'getStudentList');
+
+                const response = await fetch(GAS_API_URL, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: formData.toString()
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    allStudents = result.data;
+                    renderTable(allStudents);
+                } else {
+                    alert("데이터 로드 실패: " + result.message);
+                }
+            } catch (error) {
+                console.error("Load Error:", error);
+                document.getElementById('student-table-body').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">데이터를 불러오지 못했습니다.</td></tr>`;
+            }
+        }
+
+        // 테이블 렌더링
+        function renderTable(data) {
+            const tbody = document.getElementById('student-table-body');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-500">등록된 학생이 없습니다.</td></tr>`;
+                return;
+            }
+
+            data.forEach(student => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${student.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.school}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.grade}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${student.phone}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${student.status === '재원' ? 'bg-green-100 text-green-800' :
+                        student.status === '휴원' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                            ${student.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="editStudent('${student.id}')" class="text-indigo-600 hover:text-indigo-900 mr-3">수정</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 필터링 기능
+        function filterTable() {
+            const nameFilter = document.getElementById('filter-name').value.toLowerCase();
+            const schoolFilter = document.getElementById('filter-school').value.toLowerCase();
+            const gradeFilter = document.getElementById('filter-grade').value;
+            const phoneFilter = document.getElementById('filter-phone').value;
+            const statusFilter = document.getElementById('filter-status').value;
+
+            const filtered = allStudents.filter(s => {
+                return (s.name.toLowerCase().includes(nameFilter)) &&
+                    (s.school.toLowerCase().includes(schoolFilter)) &&
+                    (gradeFilter === "" || s.grade.includes(gradeFilter)) && // 학년은 포함 여부로 (초1, 초2... -> 초등 필터 시 로직 필요하면 수정)
+                    (s.phone.includes(phoneFilter)) &&
+                    (statusFilter === "" || s.status === statusFilter);
+            });
+
+            // 학년 필터 보정 (초등 선택 시 초1~초6 모두 포함 등)
+            // 현재는 단순 텍스트 매칭이므로, 드롭다운 값을 '초'로 하면 '초1'도 걸림.
+            // 정확한 필터링을 원하면 로직 추가 필요.
+
+            renderTable(filtered);
+        }
+
+        // 모달 관련
+        function openModal(mode, id = null) {
+            const modal = document.getElementById('studentModal');
+            const title = document.getElementById('modalTitle');
+            const form = document.getElementById('studentForm');
+
+            modal.classList.remove('hidden');
+            if (mode === 'register') {
+                title.innerText = "신규 학생 등록";
+                form.reset();
+                document.getElementById('studentId').value = '';
+                document.getElementById('regDate').value = new Date().toISOString().split('T')[0];
+            } else {
+                // 수정 모드: 데이터 채우기
+                title.innerText = "학생 정보 수정";
+                const student = allStudents.find(s => s.id === id);
+                if (student) {
+                    document.getElementById('studentId').value = student.id;
+                    document.getElementById('name').value = student.name;
+                    document.getElementById('school').value = student.school;
+                    document.getElementById('grade').value = student.grade;
+                    document.getElementById('status').value = student.status;
+                    document.getElementById('phone').value = student.phone;
+                    document.getElementById('parentPhone').value = student.parentPhone;
+                    document.getElementById('regDate').value = student.regDate.split('T')[0]; // 날짜 포맷 주의
+                }
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('studentModal').classList.add('hidden');
+        }
+
+        function editStudent(id) {
+            openModal('edit', id);
+        }
+
+        // 학생 저장 (등록/수정)
+        async function handleStudentSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('studentId').value;
+            const action = id ? 'updateStudent' : 'registerStudent';
+
+            const data = {
+                action: action,
+                id: id,
+                name: document.getElementById('name').value,
+                school: document.getElementById('school').value,
+                grade: document.getElementById('grade').value,
+                status: document.getElementById('status').value,
+                phone: document.getElementById('phone').value,
+                parentPhone: document.getElementById('parentPhone').value,
+                regDate: document.getElementById('regDate').value
+            };
+
+            // 전송
+            // Form Data 변환
+            const formData = new URLSearchParams();
+            for (const key in data) {
+                formData.append(key, data[key]);
+            }
+
+            try {
+                const response = await fetch(GAS_API_URL, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: formData.toString()
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert("저장되었습니다.");
+                    closeModal();
+                    loadStudents(); // 목록 갱신
+                } else {
+                    alert("오류 발생: " + result.message);
+                }
+            } catch (error) {
+                alert("서버 통신 오류");
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+
+</html>
