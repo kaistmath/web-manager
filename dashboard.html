@@ -129,95 +129,22 @@
                             <h3 class="text-lg font-bold text-gray-800 mb-4">학년별 분포</h3>
                             <canvas id="gradeChart" height="200"></canvas>
                         </div>
-                        <div
-                            class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex items-center justify-center text-gray-400">
-                            <p>추가 차트 영역 (준비중)</p>
-                        </div>
-                    </div>
-
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <script>
-        // ==========================================
-        // [설정] Apps Script 배포 URL을 여기에 입력하세요
-        // ==========================================
-        const GAS_API_URL = "YOUR_GAS_WEB_APP_URL_HERE";
-        // ==========================================
-
-        // [초기화] 로그인 체크 및 데이터 로드
-        window.onload = async function () {
-            const savedUser = localStorage.getItem('academy_user') || sessionStorage.getItem('academy_user');
-            if (!savedUser) {
-                alert("로그인이 필요합니다.");
-                window.location.href = "index.html";
-                return;
-            }
-
-            const user = JSON.parse(savedUser);
-            document.getElementById('user-name').innerText = user.name;
-            document.getElementById('user-role').innerText = user.role;
-            document.getElementById('user-avatar').innerText = user.name.charAt(0);
-
-            await loadDashboardData();
-        };
-
-        function logout() {
-            localStorage.removeItem('academy_user');
-            sessionStorage.removeItem('academy_user');
-            window.location.href = "index.html";
-        }
-
-        async function loadDashboardData() {
-            if (GAS_API_URL === "YOUR_GAS_WEB_APP_URL_HERE") {
-                console.error("API URL not set");
-                return;
-            }
-
-            try {
-                const response = await fetch(GAS_API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getDashboardStats' })
-                });
-                const data = await response.json();
-
-                // 1. 카드 데이터 업데이트
-                document.getElementById('stat-total-students').innerText = data.totalStudents || 0;
-                document.getElementById('stat-today-attendance').innerText = data.todayAttendance || 0;
-                document.getElementById('stat-monthly-tuition').innerText = (data.monthlyTuition || 0).toLocaleString();
-
-                // 2. 차트 업데이트
-                renderGradeChart(data.gradeDistribution);
-
-            } catch (error) {
-                console.error("Failed to load dashboard data:", error);
-                // alert("데이터 로드 실패: " + error.message);
-            }
-        }
-
-        function renderGradeChart(dist) {
-            const ctx = document.getElementById('gradeChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['초등', '중등', '고등'],
-                    datasets: [{
+                        labels: ['초등', '중등', '고등'],
+                        datasets: [{
                         data: [dist['초등'], dist['중등'], dist['고등']],
                         backgroundColor: ['#60a5fa', '#818cf8', '#a78bfa'],
                         borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
+                        }]
+                        },
+                        options: {
+                        responsive: true,
+                        plugins: {
                         legend: { position: 'bottom' }
-                    }
-                }
-            });
-        }
-    </script>
+                        }
+                        }
+                        });
+                        }
+                        </script>
 </body>
 
 </html>
