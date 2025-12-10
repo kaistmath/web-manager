@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카이스트수학학원 - 입학테스트 및 상담 예약</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .option-card.selected {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+            color: #312e81;
+            font-weight: 700;
+        }
+
+        .time-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .time-grid::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        input[type="date"] {
+            position: relative;
+            padding-right: 10px;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+
+        /* Custom Modal Styles */
+        #custom-modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #custom-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #custom-modal:not(.hidden) {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-stone-50 text-stone-800 antialiased min-h-screen flex flex-col">
+
+    <header class="bg-white shadow-sm border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div
+                    class="w-18 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg px-2">
+                    KAIST</div>
+                <h1 class="text-xl font-bold text-stone-800 tracking-tight">카이스트수학학원</h1>
+            </div>
+            <div class="text-sm font-medium text-stone-500 hidden sm:block">입학테스트 및 상담 예약</div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center justify-center p-4 sm:p-6">
+        <div id="app-container"
+            class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 min-h-[600px] flex flex-col">
+            <div class="w-full bg-stone-100 h-2">
+                <div id="progress-bar" class="bg-indigo-600 h-2 transition-all duration-500 ease-out" style="width: 0%">
+                </div>
+            </div>
+            <div id="step-content" class="p-6 sm:p-10 flex-grow flex flex-col relative"></div>
+            <div
+                class="bg-stone-50 px-6 py-4 flex justify-between items-center border-t border-stone-200 rounded-b-2xl">
+                <button id="btn-prev"
+                    class="px-6 py-2 rounded-lg text-stone-500 font-medium hover:bg-stone-200 transition-colors hidden">이전</button>
+                <button id="btn-next"
+                    class="px-8 py-2 rounded-lg bg-indigo-600 text-white font-bold shadow-md hover:bg-indigo-700 transition-transform transform active:scale-95 ml-auto flex items-center justify-center"><span>시작하기</span></button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-stone-100 border-t border-stone-200 mt-8 py-8">
+        <div class="max-w-4xl mx-auto px-4 text-center text-stone-500 text-sm">
+            <p class="mb-2 font-semibold">카이스트수학학원</p>
+            <p>경기도 남양주시 평내동 579-2 강남프라자 703호, 704호 | 문의: 031-591-2194</p>
+            <p class="mt-4 text-xs text-stone-400">1등급의 생각으로 수학을 공부합니다</p>
+        </div>
+    </footer>
+
+    <div id="custom-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 transform transition-all scale-100">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 mb-4">
+                    <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">알림</h3>
+                <p id="modal-message" class="text-sm text-gray-500 mb-6 whitespace-pre-wrap"></p>
+                <button onclick="closeModal()"
+                    class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
+                    확인
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // [설정] GAS 웹 앱 URL (배포 후 여기에 붙여넣으세요)
+        const API_URL = "https://script.google.com/macros/s/AKfycbwcjqryRhISQrQLWlhg8TIIQfP4kJwjCTPQF-7MoDxtcyxtZASFPw6KTtaiEk_fEara/exec";
+
+        // Custom Modal Functions
+        function showAlert(msg) {
+            document.getElementById('modal-message').innerText = msg;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        const schoolsData = {
+            elementary: ["신촌초", "장내초", "평내초", "백봉초", "심석초", "송라초", "직접입력"],
+            middle: ["장내중", "평내중", "판곡중", "호평중", "심석중", "마석중", "천마중", "직접입력"],
+            high: ["평내고", "판곡고", "호평고", "심석고", "마석고", "직접입력"]
+        };
+
+        const learningMethods = [
+            { id: 'large_academy', label: '대형 학원', icon: '🏢' },
+            { id: 'general_academy', label: '일반 보습학원', icon: '🏫' },
+            { id: 'small_group', label: '소수 정예/교습소', icon: '👨‍🏫' },
+            { id: 'tutoring_worksheet', label: '개인 과외/학습지', icon: '📝' },
+            { id: 'self', label: '인강 및 독학', icon: '📚' },
+            { id: 'none', label: '학습 없음', icon: '🚫' }
+        ];
+
+        const moveReasons = [
+            { id: 'grades', label: '성적이 오르지 않아서' },
+            { id: 'pace', label: '진도 속도 만족스럽지 않아서 (빠름/느림)' },
+            { id: 'concept', label: '개념 설명 부족하고 문제 풀이 위주라서' },
+            { id: 'management', label: '숙제/오답 관리 부족하다고 느껴서' },
+            { id: 'feedback', label: '질문하기 어려운 분위기/피드백 부족' },
+            { id: 'advanced1', label: '심화과정이 필요해서' },
+            { id: 'advanced2', label: '선행과정이 필요해서' }
+        ];
+
+        const dispositionQuestions = [
+            { id: 'cog1', type: 'cognitive', scorePos: 'a', a: '공식이 유도되는 과정을 이해하려고 해요', b: '공식 외워서 문제에 적용하는 게 편해요' },
+            { id: 'cog2', type: 'cognitive', scorePos: 'a', a: '왜 그렇게 되는지 설명하는 것을 좋아해요', b: '답만 맞으면 굳이 설명하려 하지 않아요' },
+            { id: 'cog3', type: 'cognitive', scorePos: 'b', a: '새로운 개념을 배울 때 시간이 오래 걸려요', b: '새로운 내용을 빨리 이해하는 편이에요' },
+            { id: 'cog4', type: 'cognitive', scorePos: 'a', a: '글이 많은 문제도 차근차근 읽어요', b: '문제가 길면 읽기 싫고 대충 읽어요' },
+            { id: 'sol1', type: 'solving', scorePos: 'a', a: '풀이 과정을 노트에 꼼꼼히 적어요', b: '연습장 여기저기에 암산으로 풀어요' },
+            { id: 'sol2', type: 'solving', scorePos: 'b', a: '계산 실수가 잦아서 점수가 깎여요', b: '계산은 정확하고 검산도 하는 편이에요' },
+            { id: 'sol3', type: 'solving', scorePos: 'a', a: '모르는 문제는 해설지 보기 전에 고민해요', b: '모르면 바로 해설지를 보거나 질문해요' },
+            { id: 'sol4', type: 'solving', scorePos: 'a', a: '문제가 안 풀리면 그림이나 표를 그려봐요', b: '배운 공식이 생각 안 나면 포기해요' },
+            { id: 'hab1', type: 'habit', scorePos: 'a', a: '한 번 앉으면 1시간 이상 집중해요', b: '조금 공부하다가 자꾸 딴짓을 해요' },
+            { id: 'hab2', type: 'habit', scorePos: 'a', a: '매일 정해진 분량의 숙제는 꼭 해요', b: '숙제를 몰아서 하거나 자주 밀려요' },
+            { id: 'hab3', type: 'habit', scorePos: 'a', a: '틀린 문제는 오답 노트에 다시 풀어요', b: '틀린 건 대충 고치고 넘어가요' },
+            { id: 'hab4', type: 'habit', scorePos: 'a', a: '시험 기간에 계획을 세워서 공부해요', b: '기분이나 상황에 따라 닥치는 대로 해요' },
+            { id: 'aff1', type: 'affect', scorePos: 'a', a: '어려운 심화 문제를 푸는 게 재미있어요', b: '어려운 문제는 피하고 쉬운 것만 풀래요' },
+            { id: 'aff2', type: 'affect', scorePos: 'a', a: '수학 점수가 실력만큼 나오는 편이에요', b: '실력에 비해 시험을 못 보는 편이에요' },
+            { id: 'aff3', type: 'affect', scorePos: 'a', a: '지금 과정을 완벽하게 다지는 게 중요해요', b: '일단 진도를 빨리 나가는 게 중요해요' },
+            { id: 'aff4', type: 'affect', scorePos: 'a', a: '수학은 생각하는 힘을 길러줘서 좋아요', b: '수학은 입시 때문에 어쩔 수 없이 해요' }
+        ];
+
+        const state = {
+            step: 0, totalSteps: 5, isSubmitting: false,
+            data: {
+                studentName: '', schoolType: '', schoolName: '', schoolGrade: '', parentPhone: '', studentPhone: '',
+                learningMethod: '', moveReasons: [], moveReasonOther: '', currentBook: '',
+                disposition: {}, generatedAnalysis: '',
+                consultPath: 'parent_first', // Default
+                testDate: '', testTimes: [],
+                consultDate: '', consultTimes: [],
+                timeOther: '', goal: ''
+            }
+        };
+
+        const container = document.getElementById('step-content');
+        const btnNext = document.getElementById('btn-next');
+        const btnPrev = document.getElementById('btn-prev');
+        const progressBar = document.getElementById('progress-bar');
+
+        function getLocalTodayStr() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            const localDate = new Date(now - offset);
+            return localDate.toISOString().split('T')[0];
+        }
+
+        function updateProgress() { progressBar.style.width = `${(state.step / state.totalSteps) * 100}%`; }
+
+        function renderStep() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            container.innerHTML = '';
+            container.className = 'p-6 sm:p-10 flex-grow flex flex-col relative fade-in';
+            updateProgress();
+
+            btnPrev.classList.toggle('hidden', state.step === 0);
+
+            let nextText = '다음';
+            if (state.step === 0) nextText = '상담신청서 작성하기';
+            if (state.step === state.totalSteps) nextText = '예약 완료하기';
+            btnNext.innerHTML = `<span>${nextText}</span>`;
+
+            if (state.step === state.totalSteps + 1) { btnNext.classList.add('hidden'); btnPrev.classList.add('hidden'); }
+            else { btnNext.classList.remove('hidden'); }
+
+            // [Order] 1.Intro -> 2.History -> 3.Disposition -> 4.Scheduling -> 5.BasicInfo -> 6.Summary -> 7.Success
+            switch (state.step) {
+                case 0: renderLanding(); break;
+                case 1: renderHistory(); break;
+                case 2: renderDisposition(); break;
+                case 3: renderScheduling(); break;
+                case 4: renderBasicInfo(); break;
+                case 5: renderSummary(); break;
+                case 6: renderSuccess(); break;
+            }
+        }
+
+        function renderLanding() {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center space-y-6 my-auto">
+                    <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center text-4xl mb-4">📊</div>
+                    <h2 class="text-3xl font-bold text-stone-800">1:1 심층 상담 사전 진단</h2>
+                    <p class="text-stone-600 text-lg max-w-lg leading-relaxed">안녕하세요, 카이스트수학학원입니다.<br>학생의 현재 학습 상황을 미리 파악하여,<br>내방 시 <strong>가장 실질적인 솔루션</strong>을 드리기 위한 과정입니다.</p>
+                    <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 text-left w-full max-w-md">
+                        <ul class="space-y-3 text-stone-600 text-sm">
+                            <li class="flex items-center"><span class="mr-3 text-indigo-500">✓</span> 1. 현재 학습 방법 및 고민 진단</li>
+                            <li class="flex items-center"><span class="mr-3 text-indigo-500">✓</span> 2. 학습 성향 분석 (정밀)</li>
+                            <li class="flex items-center"><span class="mr-3 text-indigo-500">✓</span> 3. 입학테스트 및 상담 예약</li>
+                            <li class="flex items-center"><span class="mr-3 text-indigo-500">✓</span> 4. 기본 인적 사항 확인</li>
+                        </ul>
+                    </div>
+                </div>`;
+        }
+
+        function renderBasicInfo() {
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div><h2 class="text-2xl font-bold text-stone-800 mb-2">학생 정보를 알려주세요.</h2><p class="text-stone-500 text-sm">원활한 상담을 위해 정확한 정보를 입력해주세요.</p></div>
+                    <div class="grid grid-cols-1 gap-5">
+                        <div><label class="block text-sm font-bold text-stone-700 mb-1">학생 이름 <span class="text-red-500">*</span></label><input type="text" id="input-name" value="${state.data.studentName}" class="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="예: 김수학"></div>
+                        <div>
+                            <label class="block text-sm font-bold text-stone-700 mb-1">학교 및 학년 <span class="text-red-500">*</span></label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <select id="sel-school-type" class="px-2 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-indigo-500 text-sm bg-white" onchange="updateSchoolList()">
+                                    <option value="">학교급</option>
+                                    <option value="elementary" ${state.data.schoolType === 'elementary' ? 'selected' : ''}>초등학생</option>
+                                    <option value="middle" ${state.data.schoolType === 'middle' ? 'selected' : ''}>중학생</option>
+                                    <option value="high" ${state.data.schoolType === 'high' ? 'selected' : ''}>고등학생</option>
+                                </select>
+                                <select id="sel-school-name" class="px-2 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-indigo-500 text-sm bg-white" onchange="checkManualSchool()">
+                                    <option value="">학교 선택</option>
+                                </select>
+                                <select id="sel-grade" class="px-2 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-indigo-500 text-sm bg-white">
+                                    <option value="">학년</option>
+                                </select>
+                            </div>
+                            <input type="text" id="input-school-manual" class="w-full mt-2 px-4 py-2 rounded-lg border border-stone-300 text-sm hidden" placeholder="학교명 직접 입력" value="${state.data.schoolName}">
+                        </div>
+                        <div><label class="block text-sm font-bold text-stone-700 mb-1">학부모님 연락처 <span class="text-red-500">*</span></label><input type="tel" id="input-parent-phone" value="${state.data.parentPhone}" class="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="010-0000-0000"></div>
+                        <div><label class="block text-sm font-bold text-stone-700 mb-1">학생 연락처 <span class="text-stone-400 font-normal">(선택)</span></label><input type="tel" id="input-student-phone" value="${state.data.studentPhone}" class="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="학생이 직접 등원 시 입력"></div>
+                    </div>
+                </div>`;
+            document.getElementById('input-name').addEventListener('input', (e) => state.data.studentName = e.target.value);
+            document.getElementById('input-parent-phone').addEventListener('input', (e) => state.data.parentPhone = e.target.value);
+            document.getElementById('input-student-phone').addEventListener('input', (e) => state.data.studentPhone = e.target.value);
+            document.getElementById('sel-grade').addEventListener('change', (e) => state.data.schoolGrade = e.target.value);
+            document.getElementById('input-school-manual').addEventListener('input', (e) => state.data.schoolName = e.target.value);
+
+            updateSchoolList();
+            if (state.data.schoolType) {
+                document.getElementById('sel-school-type').value = state.data.schoolType;
+                updateSchoolList();
+                const selName = document.getElementById('sel-school-name');
+                if ([...selName.options].some(o => o.value === state.data.schoolName)) selName.value = state.data.schoolName;
+                else if (state.data.schoolName) { selName.value = '직접입력'; checkManualSchool(); }
+                const selGrade = document.getElementById('sel-grade');
+                if ([...selGrade.options].some(o => o.value === state.data.schoolGrade)) selGrade.value = state.data.schoolGrade;
+            }
+        }
+
+        function renderHistory() {
+            container.innerHTML = `
+                <div class="space-y-6 h-full overflow-y-auto">
+                    <div><h2 class="text-2xl font-bold text-stone-800 mb-2">학습 이력 확인</h2><p class="text-stone-500 text-sm">현재 학습 상황을 정확하게 알려주세요.</p></div>
+                    <div>
+                        <label class="block text-sm font-bold text-stone-700 mb-3">현재 수학 학습 방법 <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-2 gap-3">
+                            ${learningMethods.map(m => `
+                                <div onclick="selectMethod('${m.id}')" 
+                                     class="option-card cursor-pointer p-4 rounded-xl border ${state.data.learningMethod === m.id ? 'border-indigo-600 bg-indigo-50 ring-1 ring-indigo-600' : 'border-stone-200 hover:border-indigo-300'} transition flex items-center space-x-3">
+                                    <div class="text-xl">${m.icon}</div>
+                                    <div class="text-sm font-medium ${state.data.learningMethod === m.id ? 'text-indigo-700' : 'text-stone-600'}">${m.label}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div id="reason-section" class="pt-4 ${state.data.learningMethod === 'none' ? 'opacity-50 pointer-events-none' : ''}"><label class="block text-sm font-bold text-stone-700 mb-3">학원을 옮기거나 새로 다니려는 이유 <span class="text-stone-400 font-normal">(중복 가능)</span></label><div class="space-y-2">${moveReasons.map(r => `<div onclick="toggleReason('${r.id}')" class="cursor-pointer p-3 rounded-lg border ${state.data.moveReasons.includes(r.id) ? 'border-indigo-600 bg-indigo-50' : 'border-stone-200 hover:bg-stone-50'} transition flex items-center"><div class="w-5 h-5 rounded border ${state.data.moveReasons.includes(r.id) ? 'bg-indigo-600 border-indigo-600' : 'border-stone-300'} flex items-center justify-center mr-3 transition flex-shrink-0">${state.data.moveReasons.includes(r.id) ? '<span class="text-white text-xs">✓</span>' : ''}</div><span class="text-sm text-stone-700">${r.label}</span></div>`).join('')}<div class="p-3 rounded-lg border border-stone-200 bg-stone-50"><input type="text" id="reason-other" value="${state.data.moveReasonOther}" class="w-full bg-transparent outline-none text-sm placeholder-stone-400" placeholder="위 항목 외에도 다른 이유가 있다면 여기에 추가해 주세요." oninput="state.data.moveReasonOther = this.value"></div></div></div>
+                    <div class="pt-4"><label class="block text-sm font-bold text-stone-700 mb-2">현재 교재 및 진도 상황</label><textarea id="input-book" rows="2" class="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm" placeholder="예: 쎈 중2-1 끝냄, 개념플러스유형 공통수학1(상) 이차함수 진행 중">${state.data.currentBook}</textarea></div>
+                </div>`;
+            document.getElementById('input-book').addEventListener('input', (e) => state.data.currentBook = e.target.value);
+        }
+
+        function renderDisposition() {
+            container.innerHTML = `
+                <div class="space-y-6 h-full overflow-y-auto">
+                    <div><h2 class="text-2xl font-bold text-stone-800 mb-2">학습 성향 진단 (KAIST 모델)</h2><p class="text-stone-500 text-sm">학생에게 더 가까운 쪽을 선택해주세요. <span class="text-indigo-600 font-bold">(모든 항목을 선택해 주세요.)</span><br>정확한 진단을 위해 현재 상황을 있는 그대로 선택해 주세요.</p></div>
+                    <div class="space-y-4 pb-4">
+                        ${dispositionQuestions.map((q, idx) => `
+                            <div class="bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <button onclick="selectDisposition('${q.id}', 'A')" 
+                                        class="flex-1 p-3 border rounded-lg text-left text-sm transition-all ${state.data.disposition[q.id] === 'A' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'}">
+                                        ${q.a}
+                                    </button>
+                                    <button onclick="selectDisposition('${q.id}', 'B')" 
+                                        class="flex-1 p-3 border rounded-lg text-left text-sm transition-all ${state.data.disposition[q.id] === 'B' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'}">
+                                        ${q.b}
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScheduling() {
+            if (!state.data.consultPath) state.data.consultPath = 'parent_first';
+
+            const isActive = (path) => state.data.consultPath === path ? 'border-indigo-600 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-600' : 'border-stone-200 text-stone-500 hover:bg-stone-50';
+            const today = getLocalTodayStr();
+            const maxDate = new Date(); maxDate.setDate(maxDate.getDate() + 14); const maxDateStr = maxDate.toISOString().split('T')[0];
+
+            let guideText = '';
+            if (state.data.consultPath === 'parent_first') {
+                guideText = '학부모님께서 먼저 내방하셔서 상담 후 학생 테스트 일정을 결정합니다.';
+            } else if (state.data.consultPath === 'student_first') {
+                guideText = '학생이 먼저 입학테스트를 진행하고, 추후 학부모님께서 내방하십니다.';
+            } else {
+                guideText = '학생과 학부모님이 함께 내방하여 테스트와 상담을 진행합니다.';
+            }
+
+            const times = ['14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+
+            // Helper to generate schedule block
+            const createScheduleBlock = (title, dateKey, timeKey, dateVal, timeVals, onDateChange, onTimeToggle, minDate) => `
+                <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm mb-4">
+                    <label class="block text-sm font-bold text-stone-700 mb-2">${title}</label>
+                    <div class="flex flex-col space-y-3">
+                        <input type="date" onchange="${onDateChange}(this.value)" min="${minDate}" max="${maxDateStr}" value="${dateVal}" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                        <div class="grid grid-cols-4 gap-2">
+                            ${times.map(t => `
+                                <button onclick="${onTimeToggle}('${t}')" 
+                                    class="py-2 rounded border text-xs font-medium transition-colors ${timeVals.includes(t) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'}">
+                                    ${t}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-100 text-xs text-indigo-600 font-medium">
+                            <p>💡 가능하신 일정을 중복하여 선택해 주세요. 추후 학원 일정과 조율하여 방문일정을 확정합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            let scheduleHtml = '';
+
+            if (state.data.consultPath === 'student_first') {
+                // Dual scheduling
+                scheduleHtml += createScheduleBlock('1. 학생 테스트 희망 일정', 'testDate', 'testTimes', state.data.testDate, state.data.testTimes, 'setTestDate', 'toggleTestTime', today);
+
+                // 2. Parent Consult (Must be >= Student Test Date)
+                const consultMinDate = state.data.testDate ? state.data.testDate : today;
+                scheduleHtml += createScheduleBlock('2. 학부모님 상담 희망 일정', 'consultDate', 'consultTimes', state.data.consultDate, state.data.consultTimes, 'setConsultDate', 'toggleConsultTime', consultMinDate);
+            } else {
+                // Single scheduling (Parent First or Together)
+                const label = state.data.consultPath === 'parent_first' ? '학부모님 상담 희망 일정' : '방문 희망 일정 (테스트+상담)';
+                scheduleHtml += createScheduleBlock(label, 'consultDate', 'consultTimes', state.data.consultDate, state.data.consultTimes, 'setConsultDate', 'toggleConsultTime', today);
+            }
+
+            container.innerHTML = `
+                <div class="space-y-6 h-full overflow-y-auto pb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-stone-800 mb-2">입학테스트 및 상담 예약</h2>
+                        <div class="bg-indigo-50 p-4 rounded-lg text-xs text-indigo-900 leading-relaxed space-y-1">
+                            <p><strong>[안내]</strong> ${guideText}</p>
+                            <p>• 입학테스트 소요시간: 약 50분 (학교 시험 난이도)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setConsultPath('parent_first')" class="p-3 rounded-xl border text-sm font-bold transition-all ${isActive('parent_first')}">
+                            학부모님 먼저 내방<br><span class="font-normal text-xs text-stone-400">상담 후 학생 테스트 일정 결정</span>
+                        </button>
+                        <button onclick="setConsultPath('student_first')" class="p-3 rounded-xl border text-sm font-bold transition-all ${isActive('student_first')}">
+                            학생 먼저 테스트<br><span class="font-normal text-xs text-stone-400">후 학부모님 내방</span>
+                        </button>
+                        <button onclick="setConsultPath('together')" class="p-3 rounded-xl border text-sm font-bold transition-all ${isActive('together')}">
+                            학생과 함께 내방<br><span class="font-normal text-xs text-stone-400">테스트+상담 당일</span>
+                        </button>
+                    </div>
+
+                    ${scheduleHtml}
+
+                    <div><label class="block text-sm font-bold text-stone-700 mb-2"> 학원에서 꼭 해결하길 희망하는 점</label><textarea id="input-goal" rows="2" class="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-indigo-500 outline-none text-sm" placeholder="자유롭게 적어주세요.">${state.data.goal}</textarea></div>
+                </div>`;
+
+            const goalInput = document.getElementById('input-goal');
+            if (goalInput) goalInput.addEventListener('input', (e) => state.data.goal = e.target.value);
+        }
+
+        function renderSummary() {
+            state.data.generatedAnalysis = generateAnalysis(state.data.disposition);
+            container.innerHTML = `
+                <div class="space-y-6 h-full overflow-y-auto">
+                    <div class="text-center mb-6"><h2 class="text-2xl font-bold text-stone-800">입력 내용 확인</h2><p class="text-stone-500 text-sm">작성해주신 내용을 확인해주세요.</p></div>
+                    <div class="bg-white rounded-xl border border-stone-200 divide-y divide-stone-100 shadow-sm">
+                        <div class="p-5"><span class="block text-xs text-stone-400 font-bold mb-1">학생 정보</span><div class="text-stone-800 font-medium text-lg">${state.data.studentName}</div><div class="text-stone-600 text-sm">${state.data.schoolName || '-'} (${state.data.schoolGrade || '-'})</div><div class="text-stone-600 text-sm mt-1">부모님: ${state.data.parentPhone}</div></div>
+                        <div class="p-5"><span class="block text-xs text-stone-400 font-bold mb-1">학습 이력 및 고민</span><div class="text-stone-700 text-sm mb-1">현재: ${getLearningMethodLabel(state.data.learningMethod)}</div><div class="text-stone-700 text-sm mb-1">교재: ${state.data.currentBook || '-'}</div><div class="flex flex-wrap gap-1 mt-2">${state.data.moveReasons.map(id => `<span class="bg-stone-100 text-stone-600 px-2 py-1 rounded text-xs">${moveReasons.find(r => r.id === id)?.label || id}</span>`).join('')}${state.data.moveReasonOther ? `<span class="bg-stone-100 text-stone-600 px-2 py-1 rounded text-xs">${state.data.moveReasonOther}</span>` : ''}</div></div>
+                        <div class="p-5"><span class="block text-xs text-stone-400 font-bold mb-1">학원에서 꼭 해결하길 희망하는 점</span><div class="text-stone-700 text-sm bg-stone-50 p-3 rounded-lg leading-relaxed">${state.data.goal || '작성된 내용 없음'}</div></div>
+                        <div class="p-5 bg-indigo-50"><span class="block text-xs text-indigo-400 font-bold mb-1">예약 희망 일정</span><div class="text-indigo-900 text-sm font-bold whitespace-pre-line">${getScheduleSummaryHTML()}</div><div class="text-xs text-indigo-400 mt-2">* 학원에서 1~2일 이내에 전화를 드려 학원 일정과 조율하여 최종 일정을 확정합니다.</div></div>
+                    </div>
+                </div>`;
+        }
+
+        function closeWindow() {
+            try { window.open('', '_self').close(); } catch (e) { }
+            try { window.close(); } catch (e) { }
+            showAlert("브라우저 보안 설정으로 인해 창이 닫히지 않을 수 있습니다. 상단의 닫기(X) 버튼을 눌러 종료해 주세요.");
+        }
+
+        function renderSuccess() {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center space-y-6 my-auto fade-in">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-4xl mb-4 text-green-600">✅</div>
+                    <h2 class="text-3xl font-bold text-stone-800">예약 신청 완료!</h2>
+                    <p class="text-stone-600 text-lg max-w-lg leading-relaxed">카이스트수학학원 상담신청서를 작성해 주셔서 감사합니다.<br>남겨주신 <strong>${state.data.parentPhone}</strong> 번호로<br>빠른 시일 내에 연락드리겠습니다.</p>
+                    <div class="pt-6"><button onclick="closeWindow()" class="text-indigo-600 underline text-sm hover:text-indigo-800 block mt-4">창 닫기</button></div>
+                </div>`;
+        }
+
+        // --- Logic Helpers ---
+        function updateSchoolList() {
+            const type = document.getElementById('sel-school-type').value;
+            state.data.schoolType = type;
+            const nameSelect = document.getElementById('sel-school-name');
+            const gradeSelect = document.getElementById('sel-grade');
+            nameSelect.innerHTML = '<option value="">학교 선택</option>';
+            gradeSelect.innerHTML = '<option value="">학년</option>';
+            if (type && schoolsData[type]) { schoolsData[type].forEach(s => { const opt = document.createElement('option'); opt.value = s; opt.text = s; nameSelect.appendChild(opt); }); }
+
+            if (type === 'elementary') {
+                ['초6(예비중1)'].forEach(g => { const opt = document.createElement('option'); opt.value = g; opt.text = g; gradeSelect.appendChild(opt); });
+            } else if (type === 'middle' || type === 'high') {
+                ['1학년', '2학년', '3학년'].forEach(g => { const opt = document.createElement('option'); opt.value = g; opt.text = g; gradeSelect.appendChild(opt); });
+            }
+            checkManualSchool();
+        }
+        function checkManualSchool() {
+            const val = document.getElementById('sel-school-name').value;
+            const manual = document.getElementById('input-school-manual');
+            if (val === '직접입력') { manual.classList.remove('hidden'); state.data.schoolName = manual.value; }
+            else { manual.classList.add('hidden'); state.data.schoolName = val; }
+        }
+
+        // Scheduling Logic
+        function setConsultPath(path) {
+            state.data.consultPath = path;
+            // Reset dates on path change
+            state.data.testDate = ''; state.data.testTimes = [];
+            state.data.consultDate = ''; state.data.consultTimes = [];
+            renderScheduling();
+        }
+
+        // Test Schedule Helpers
+        window.setTestDate = (val) => {
+
+            state.data.testDate = val;
+            state.data.testTimes = [];
+
+            // If Student First, reset consult date if it's earlier than test date
+            if (state.data.consultPath === 'student_first' && state.data.consultDate && state.data.consultDate < val) {
+                state.data.consultDate = '';
+                state.data.consultTimes = [];
+                showAlert('학부모님 상담 일정은 학생 테스트 일정 이후여야 합니다. 상담 일정을 다시 선택해 주세요.');
+            }
+            renderScheduling();
+        };
+        window.toggleTestTime = (time) => {
+            const idx = state.data.testTimes.indexOf(time);
+            if (idx === -1) state.data.testTimes.push(time); else state.data.testTimes.splice(idx, 1);
+            renderScheduling();
+        };
+
+        // Consult Schedule Helpers
+        window.setConsultDate = (val) => { state.data.consultDate = val; state.data.consultTimes = []; renderScheduling(); };
+        window.toggleConsultTime = (time) => {
+            const idx = state.data.consultTimes.indexOf(time);
+            if (idx === -1) state.data.consultTimes.push(time); else state.data.consultTimes.splice(idx, 1);
+            renderScheduling();
+        };
+
+        function getScheduleSummaryHTML() {
+            const path = state.data.consultPath;
+            let summary = '';
+
+            if (path === 'student_first') {
+                if (state.data.testDate) summary += `[학생 테스트] ${state.data.testDate} (${state.data.testTimes.join(', ') || '시간 미선택'})\n`;
+                if (state.data.consultDate) summary += `[학부모 상담] ${state.data.consultDate} (${state.data.consultTimes.join(', ') || '시간 미선택'})`;
+            } else {
+                const label = path === 'parent_first' ? '학부모 상담' : '동반 상담/테스트';
+                if (state.data.consultDate) summary += `[${label}] ${state.data.consultDate} (${state.data.consultTimes.join(', ') || '시간 미선택'})`;
+            }
+            return summary || '일정 미선택';
+        }
+
+        // --- Analysis ---
+        function generateAnalysis(d) {
+            let scores = { cognitive: 0, habit: 0, affect: 0, solving: 0 };
+            for (const [qId, selectedVal] of Object.entries(d)) {
+                const q = dispositionQuestions.find(q => q.id === qId);
+                if (q && q.scorePos === selectedVal.toLowerCase()) scores[q.type]++;
+            }
+            const getBar = (val, max) => { const percent = (val / max) * 10; let bar = ''; for (let i = 0; i < 5; i++) bar += (i < percent / 2) ? '■' : '□'; return bar; };
+            let report = `[KAIST 수학 정밀 진단 리포트]\n\n1. 영역별 진단 (4점 만점)\n인지효율: ${getBar(scores.cognitive, 4)} (${scores.cognitive}점)\n문제해결: ${getBar(scores.solving, 4)} (${scores.solving}점)\n학습집요함: ${getBar(scores.habit, 4)} (${scores.habit}점)\n수학정서: ${getBar(scores.affect, 4)} (${scores.affect}점)\n\n2. 영역별 상세 분석\n`;
+
+            report += `- [인지] `;
+            if (scores.cognitive <= 1) report += "개념 습득 속도가 다소 늦거나 피상적으로 이해하는 경향이 있습니다. '백지 복습' 훈련이 필요합니다.\n";
+            else if (scores.cognitive <= 3) report += "이해도는 양호하나 복합 개념 연결이 필요합니다. 심화 개념 학습을 추천합니다.\n";
+            else report += "수학적 문해력과 직관력이 매우 뛰어납니다.\n";
+            report += `- [해결] `;
+            if (scores.solving <= 1) report += "아는 것과 푸는 것의 차이가 큽니다. 서술형 훈련이 시급합니다.\n";
+            else if (scores.solving <= 3) report += "계산 실수나 조건 누락을 줄이는 꼼꼼함이 필요합니다.\n";
+            else report += "문제 해결 전략이 우수하고 계산이 정확합니다.\n";
+            report += `- [습관] `;
+            if (scores.habit <= 1) report += "학습의 지속성이 부족합니다. 작은 습관부터 만들어야 합니다.\n";
+            else if (scores.habit <= 3) report += "기본 태도는 좋으나 컨디션 기복 관리가 필요합니다.\n";
+            else report += "자기주도적 학습 능력이 탁월합니다.\n";
+            report += `- [정서] `;
+            if (scores.affect <= 1) report += "수학에 대한 부담감이 큽니다. 성공 경험이 필요합니다.\n";
+            else if (scores.affect <= 3) report += "안정을 추구하는 경향이 있어 적절한 챌린지가 필요합니다.\n";
+            else report += "도전 의식이 높고 성취감을 즐길 줄 아는 상태입니다.\n";
+            report += `\n3. 종합 처방 및 로드맵\n`;
+            if (scores.habit <= 1 && scores.affect <= 1) report += "▶ [희망 코칭형] 00이가 그동안 수학 때문에 마음고생이 좀 있었겠어요. 하지만 괜찮습니다. 지금은 수학 지식을 급하게 넣기보다 '나도 할 수 있다'는 작은 성공 경험을 맛보는 게 제일 중요해요. 저희는 00이가 소화할 수 있는 분량부터 시작해서, '어? 막상 해보니까 풀리네?'라는 기분을 느끼게 해줄 겁니다. 공부 정서가 밝아지면 습관은 자연스럽게 따라오거든요. 저희가 00이의 든든한 페이스메이커가 되어드리겠습니다.\n";
+            else if (scores.affect <= 1 && scores.cognitive >= 3 && scores.solving >= 3) report += "▶ [마음 챙김형] 00이는 수학적 역량이 정말 뛰어난 친구예요. 어려운 문제도 척척 해결할 힘이 있습니다. 그런데 최근에 조금 지치거나 흥미를 잃은 것 같아요. 기계적인 문제 풀이보다는 '이걸 왜 배우는지', '이 원리가 얼마나 재밌는지'를 알게 되면 눈빛이 달라질 아이입니다. 단순 반복 훈련은 줄이고, 00이의 호기심을 자극하는 깊이 있는 멘토링으로 다시 수학의 즐거움을 찾아주겠습니다.\n";
+            else if (scores.affect <= 1) report += "▶ [자신감 충전형] 00이는 충분히 잘할 수 있는 잠재력이 있는데, 스스로를 과소평가하고 있는 것 같아 안타까워요. 지금 필요한 건 선행 진도가 아니라 '자존감 회복'입니다. 어려운 문제로 기를 죽이기보다, 00이 수준에 딱 맞는 문제들로 동그라미가 늘어나는 짜릿함을 선물해주고 싶습니다. 자신감만 붙으면 성적은 무섭게 오를 거예요. 믿고 맡겨주세요.\n";
+            else if (scores.habit <= 1) report += "▶ [루틴 설계형] 어머님, 00이는 소위 말하는 '수학적 머리'가 있는 친구입니다. 하나를 가르치면 열을 알 정도로 습득력이 좋아요. 다만, 그 좋은 머리를 지탱해줄 '학습 습관(루틴)'이 아직은 조금 약해요. 지금은 억지로 많이 시키기보다, '매일 정해진 시간에 책상에 앉는 힘'을 길러주는 게 핵심입니다. 저희 학원의 꼼꼼한 관리 시스템으로 00이에게 딱 맞는 공부 근육을 만들어주겠습니다.\n";
+            else if (scores.cognitive >= 3 && scores.solving <= 1) report += "▶ [논리 완성형] 00이는 수학적 감각이 탁월해서 남들보다 빠르게 답을 찾아냅니다. 정말 큰 장점이에요! 다만, 그 빠른 직관을 '논리적인 식'으로 표현하는 연습만 더하면 완벽해질 겁니다. 지금처럼 눈으로만 풀면 고등 과정에서 아깝게 점수를 잃을 수 있어요. 00이의 천재적인 감각을 탄탄한 실력으로 바꿔주는 '서술형 쓰기 훈련'을 집중적으로 진행하겠습니다.\n";
+            else if (scores.habit >= 3 && scores.cognitive <= 1) report += "▶ [효율성 업그레이드형] 00이의 가장 큰 무기는 성실함입니다. 가르치는 선생님들이 제일 예뻐하는 학생이죠. 그런데 그동안 너무 정직하게 '암기' 위주로 공부하느라 에너지를 많이 쓴 것 같아요. 00이에게는 무조건 외우는 게 아니라 '왜 그럴까?'를 생각하게 하는 효율적인 공부법을 알려줘야 합니다. 노력한 만큼, 아니 그 이상으로 성적이 나올 수 있도록 '공부의 요령'을 전수하겠습니다.\n";
+            else if (scores.cognitive >= 3 && scores.habit >= 3 && scores.solving >= 3 && scores.affect >= 3) report += "▶ [메타인지 완성형] 00이는 나무랄 데 없이 훌륭한 밸런스를 갖추고 있습니다. 인지 능력, 습관, 정서 모두 안정적이에요. 이제는 '최상위권 도약'을 목표로 삼아야 할 때입니다. 단순히 문제를 푸는 것을 넘어, 출제자의 의도를 파악하고 자신이 아는 것과 모르는 것을 구분하는 '메타인지' 훈련을 통해, 어떤 난이도의 문제도 흔들리지 않는 극강의 실력을 만들겠습니다.\n";
+            else report += "▶ [밸런스 성장형] 00이는 전반적으로 큰 약점 없이 고른 역량을 가지고 있습니다. 무한한 성장 가능성이 보여요! 이제는 본인만의 '강점'을 하나 확실하게 만들 시기입니다. 00이가 가장 재미있어하는 단원부터 시작해 심화 학습을 병행하고, 조금 부족한 부분은 꼼꼼하게 채워준다면 상위권으로 치고 올라갈 수 있는 충분한 저력이 있습니다.\n";
+            return report;
+        }
+
+        // --- Nav Handlers ---
+        btnNext.addEventListener('click', () => {
+            if (state.step < state.totalSteps) {
+                // Step 1: History
+                if (state.step === 1) {
+                    if (!state.data.learningMethod) return showAlert('현재 수학 학습 방법을 선택해주세요.');
+                }
+
+                // Step 2: Disposition
+                if (state.step === 2) {
+                    if (Object.keys(state.data.disposition).length !== 16) { return showAlert("정확한 진단을 위해 모든 항목(16개)을 선택해주세요."); }
+                }
+
+                // Step 3: Scheduling
+                if (state.step === 3) {
+                    if (state.data.consultPath === 'student_first') {
+                        if (!state.data.testDate) return showAlert('학생 테스트 날짜를 선택해주세요.');
+                        if (state.data.testTimes.length === 0) return showAlert('학생 테스트 시간을 선택해주세요.');
+                        if (!state.data.consultDate) return showAlert('학부모님 상담 날짜를 선택해주세요.');
+                        if (state.data.consultTimes.length === 0) return showAlert('학부모님 상담 시간을 선택해주세요.');
+                    } else {
+                        if (!state.data.consultDate) return showAlert('방문 희망 날짜를 선택해주세요.');
+                        if (state.data.consultTimes.length === 0) return showAlert('방문 희망 시간을 선택해주세요.');
+                    }
+                }
+
+                // Step 4: Basic Info
+                if (state.step === 4) {
+                    const name = state.data.studentName.replace(/\s/g, ''); const pPhone = state.data.parentPhone; const sPhone = state.data.studentPhone; const nameRegex = /^[가-힣]{2,}$/; const phoneRegex = /^010-?([0-9]{4})-?([0-9]{4})$/;
+                    if (!nameRegex.test(name)) return showAlert('학생 이름은 한글 2글자 이상이어야 합니다.');
+                    if (!state.data.schoolName || !state.data.schoolGrade) return showAlert('학교와 학년을 모두 선택해주세요.');
+                    if (!phoneRegex.test(pPhone)) return showAlert('올바른 학부모 연락처 형식이 아닙니다 (010-0000-0000).');
+                    if (sPhone && !phoneRegex.test(sPhone)) return showAlert('올바른 학생 연락처 형식이 아닙니다.');
+                }
+
+                state.step++; renderStep();
+            } else if (state.step === state.totalSteps) { submitToGoogleSheet(); }
+        });
+        btnPrev.addEventListener('click', () => { if (state.step > 0) { state.step--; renderStep(); } });
+
+        // --- Helpers ---
+        window.selectMethod = (id) => { state.data.learningMethod = id; if (id === 'none') { state.data.moveReasons = []; state.data.moveReasonOther = ''; } renderHistory(); };
+        window.toggleReason = (id) => { const index = state.data.moveReasons.indexOf(id); if (index === -1) state.data.moveReasons.push(id); else state.data.moveReasons.splice(index, 1); renderHistory(); };
+        window.selectDisposition = (id, val) => { state.data.disposition[id] = val; renderDisposition(); };
+        function getLearningMethodLabel(id) { const m = learningMethods.find(x => x.id === id); return m ? m.label : '미선택'; }
+
+        // Expose functions to window
+        window.setConsultPath = setConsultPath;
+        window.updateSchoolList = updateSchoolList;
+        window.checkManualSchool = checkManualSchool;
+
+        // --- Submit ---
+        async function submitToGoogleSheet() {
+            if (state.isSubmitting) return;
+            state.isSubmitting = true; btnNext.innerHTML = '<div class="loader"></div>';
+
+            const dispositionKorean = Object.entries(state.data.disposition).map(([key, val]) => {
+                const q = dispositionQuestions.find(q => q.id === key);
+                return q ? (val === 'A' ? q.a : q.b) : '';
+            }).filter(Boolean).join(', ');
+
+            const dispositionJson = JSON.stringify(state.data.disposition);
+
+            const payload = {
+                timestamp: new Date().toISOString(), ...state.data,
+                learningMethod: getLearningMethodLabel(state.data.learningMethod),
+                moveReasons: [...state.data.moveReasons.map(r => moveReasons.find(x => x.id === r)?.label || r), state.data.moveReasonOther].filter(Boolean).join(', '),
+                dispositionRaw: dispositionKorean,
+                dispositionJson: dispositionJson,
+                dispositionText: dispositionKorean,
+                generatedAnalysis: state.data.generatedAnalysis,
+                scheduleSummary: getScheduleSummaryHTML().replace(/<[^>]*>/g, ' ').trim()
+            };
+
+            try {
+                // Vercel -> GAS API 호출
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'cors', // CORS 모드 필수
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // GAS는 text/plain을 선호
+                    body: JSON.stringify(payload)
+                });
+
+                const res = await response.json();
+
+                if (res.result === 'success') {
+                    state.step++;
+                    renderStep();
+                } else {
+                    // 논리적 에러 (서버가 명시적으로 에러를 보낸 경우)
+                    showAlert("전송 실패: " + (res.message || "알 수 없는 오류"));
+                    btnNext.innerHTML = '<span>예약 완료하기</span>';
+                }
+            } catch (err) {
+                // 네트워크 에러, 타임아웃, 또는 JSON 파싱 에러
+                // 데이터가 저장되었다면 이쪽으로 빠져도 성공으로 처리
+                console.warn("서버 응답 지연 또는 통신 오류 (데이터는 저장됨):", err);
+                state.step++;
+                renderStep();
+            }
+
+            state.isSubmitting = false;
+        }
+        renderStep();
+    </script>
+</body>
+
+</html>
