@@ -266,9 +266,16 @@
                 const reportUrl = String(item.reportUrl || '');
 
                 if (reportUrl && reportUrl.startsWith('http')) {
-                    reportAction = `<a href="${reportUrl}" target="_blank" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs mr-2">보고서 생성</a>`;
+                    reportAction = `
+                        <div class="flex items-center justify-center space-x-2">
+                            <a href="${reportUrl}" target="_blank" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs">보고서 보기</a>
+                            <button onclick="copyToClipboard('${reportUrl}')" class="text-gray-400 hover:text-indigo-600 transition-colors" title="링크 복사">
+                                <i class="far fa-copy"></i>
+                            </button>
+                        </div>
+                    `;
                 } else {
-                    reportAction = `<span class="text-gray-400 text-xs mr-2">보고서 없음</span>`;
+                    reportAction = `<span class="text-gray-400 text-xs">보고서 없음</span>`;
                 }
 
                 // 접수확인 버튼 (Reply Copy)
@@ -307,6 +314,27 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        // 링크 복사 함수
+        function copyToClipboard(text) {
+            if (!text) return;
+
+            // 임시 textarea 생성
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                alert("보고서 링크가 복사되었습니다.\n크롬 주소창에 붙여넣기 하세요.");
+            } catch (err) {
+                console.error('Copy failed', err);
+                alert("링크 복사에 실패했습니다.");
+            } finally {
+                document.body.removeChild(textArea);
+            }
         }
 
         // 접수확인 텍스트 복사
