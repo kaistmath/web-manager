@@ -78,12 +78,25 @@
 
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
                 <div class="max-w-7xl mx-auto">
-                    <div class="flex justify-between items-center mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <h2 class="text-2xl font-bold text-gray-800">상담신청서 접수 현황</h2>
-                        <button onclick="loadConsultations()"
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
-                            <i class="fas fa-sync-alt mr-2"></i>새로고침
-                        </button>
+                        
+                        <div class="flex flex-wrap gap-2">
+                            <a href="https://kaist-web-manager.vercel.app/consultation.html" target="_blank"
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm flex items-center">
+                                <i class="fas fa-edit mr-2"></i>상담신청서 작성
+                            </a>
+                
+                            <button onclick="showSystemInfo()"
+                                class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors shadow-sm flex items-center">
+                                <i class="fas fa-info-circle mr-2"></i>참고사항
+                            </button>
+                
+                            <button onclick="loadConsultations()"
+                                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm flex items-center">
+                                <i class="fas fa-sync-alt mr-2"></i>새로고침
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Table Section -->
@@ -365,7 +378,23 @@
             loadUserInfo();
             loadConsultations();
         };
+
+        // 시스템 연결 정보 알림창 함수
+function showSystemInfo() {
+    const infoMsg = `[시스템 연결 정보 가이드]
+
+1. 상담신청서 (블로그 게시용 주소):
+https://kaist-web-manager.vercel.app/consultation.html
+
+2. 데이터베이스 (구글 시트):
+https://docs.google.com/spreadsheets/d/16afl3qn7yjWQxdZyoZrI__IuBcfbiNVciUwJTQQ4eB0/edit
+
+※ 위 두 페이지는 현재 동일한 GAS 백엔드 주소와 연결되어 있습니다.`;
+
+    alert(infoMsg);
+}
     </script>
 </body>
+
 
 </html>
